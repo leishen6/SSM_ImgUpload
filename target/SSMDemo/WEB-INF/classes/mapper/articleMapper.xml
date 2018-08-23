@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javen.mapping.ArticleMapper">
+
+     <!-- User 联合文章进行查询 方法之一的配置 (多对一的方式)user没办法复用，不推荐使用 -->   
+     <!-- <resultMap id="resultUserArticleList" type="Article">
+         <id property="id" column="id" />
+         <result property="title" column="title" />
+         <result property="content" column="content" />
+         
+         <association property="user" javaType="User">
+             <id property="id" column="id" />
+             <result property="userName" column="userName" />
+             <result property="userAddress" column="userAddress" />            
+         </association>        
+     </resultMap> -->
+     <resultMap type="User" id="resultListUser">
+         <id column="id" property="id" />
+         <result column="username" property="username" />
+         <result column="age" property="age" />
+     </resultMap>
+
+     <!-- User 联合文章进行查询 方法之二的配置 (多对一的方式) -->    
+     <resultMap id="resultUserArticleList" type="Article">
+    <!-- (依据下面的select中更名的字段id别名aid，在此将相同的字段名改为别名),多张表中当字段同名时需要起别名区分 -->
+         <id property="id" column="aid" />
+         <result property="title" column="title" />
+         <result property="content" column="content" />        
+         <association property="user" javaType="User" resultMap="resultListUser" />            
+     </resultMap>
+     <select id="getUserArticles" parameterType="int" resultMap="resultUserArticleList">
+        select u.id,u.username,u.age,a.id aid,a.title,a.content from d_user u,article a
+               where u.id=a.userid and u.id=#{id}
+     </select>
+     <select id="getArticles" parameterType="Article" resultType="Article">
+     	select * from article 
+     	<where>
+     	<if test="title!=null">
+     		and title like concat('%',#{title},'%')
+     	</if>
+     	<if test="content!=null">
+     		and content like concat('%',#{content},'%')
+     	</if>
+     	</where>
+     </select>
+    
+</mapper>
